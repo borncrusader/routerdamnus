@@ -6,13 +6,102 @@ router_t::router_t()
   return;
 }
 
-void router_t::usage(void)
+router_t::~router_t()
 {
-  cout<<"routerdamnus <file>"<<endl;
+}
+
+struct compare {
+  bool operator()(const set_entry_t s1, const set_entry_t s2) {
+    if(s1.path_cost < s2.path_cost) {
+      return true;
+    } else {
+      return false;
+    }
+
+  }
+};
+
+int router_t::link_state(unsigned int v1, unsigned int v2)
+{
+  set <set_entry_t, compare> edge_set;
+  set<set_entry_t>::iterator find_iter;
+  set_entry_t e, f;
+  int i;
+  float path_cost[this->num_v];
+  unsigned int parent[this->num_v];
+
+  for(i=0; i<this->num_v; i++) {
+    if(i == v1-1) {
+      path_cost[i] = 0;
+    } else {
+      path_cost[i] = numeric_limits<float>::max();
+    }
+    parent[i] = i;
+      /*
+    e.vertex = i; // this entry's vertex id
+    e.parent = i; // each has it as its own parent at the start
+    if(i == v1-1) {
+      // for the start node, the path_cost is initialised as 0
+      e.path_cost = 0;
+    } else {
+      // rest of the nodes, it is the max possible value
+      e.path_cost = numeric_limits<float>::max();
+    }
+
+    edge_set.insert(e);
+    */
+  }
+  e.vertex = v1-1;
+  e.path_cost = 0;
+  edge_set.insert(e);
+
+  while(edge_set.empty() == false) {
+    e = *(edge_set.begin());
+
+    for(i=0; i<this->adj_list[e.vertex].size(); i++) {
+      if(e.path_cost + this->adj_list[e.vertex][i].weight < path_cost[i]) {
+        f.vertex = e.vertex;
+        f.path_cost = e.path_cost;
+
+        find_iter = edge_set.find(f);
+      }
+    }
+
+    edge_set.erase(edge_set.begin());
+  }
+  //   retrieve the first element from the queue
+  //   check the adj list of this node and update its adjacent vertices
+}
+
+void warn(const char *msg, int err)
+{
+  if(err== 0) {
+    cout<<msg<<endl;
+  } else {
+    cout<<msg<<": "<<strerror(err)<<endl;
+  }
+}
+
+void die(const char *msg, int err)
+{
+  warn(msg, err);
+
+  exit(err);
+}
+
+void router_t::link_state_usage()
+{
+  cout<<"link_state file-name node1 node2"<<endl;
   exit(1);
 }
 
-int router_t::read_and_parse(char *filename)
+void router_t::distance_vector_usage()
+{
+  cout<<"distance_vector initial-node file-name node1 node2"<<endl;
+  exit(1);
+}
+
+void router_t::read_and_parse(const char *filename)
 {
   int i, j;
   unsigned int v1, v2;
@@ -23,9 +112,7 @@ int router_t::read_and_parse(char *filename)
   is.open(filename, ios::in);
 
   if(is.is_open() == false) {
-    // die
-    cout<<"no file!"<<endl;
-    return 1;
+    die("file could not be read!", errno);
   }
 
   is.getline(line, MAX_LINE);
@@ -36,7 +123,6 @@ int router_t::read_and_parse(char *filename)
   while(true) {
     is.getline(line, MAX_LINE);
     if(is.eof()) {
-      cout<<"stop!"<<endl;
       break;
     }
 
@@ -67,14 +153,14 @@ int router_t::read_and_parse(char *filename)
   read_adj_list();
   is.close();
 
-  return 0;
+  return;
 }
 
 int router_t::insert_adj_list(unsigned int v1, unsigned int v2, float weight)
 {
   adj_list_entry_t entry;
 
-  entry.vertex = v2;
+  entry.vertex = v2-1;
   entry.weight = weight;
 
   this->adj_list[v1-1].push_back(entry);
@@ -89,67 +175,10 @@ int router_t::read_adj_list()
   for(i=0; i<this->num_v; i++) {
     printf("%d: ", i+1);
     for(j=0; j<this->adj_list[i].size(); j++) {
-      printf("%d, e: %f; ", this->adj_list[i][j].vertex, this->adj_list[i][j].weight);
+      printf("%d, e: %f; ", this->adj_list[i][j].vertex+1, this->adj_list[i][j].weight);
     }
     cout<<endl;
   }
 
   return 1;
-}
-
-bool compare_queue::operator()(queue_entry_t e1, queue_entry_t e2)
-{
-  if(e1.path_cost>e2.path_cost) {
-    return true;
-  }
-
-  return false;
-}
-
-int router_t::link_state(unsigned int v1, unsigned int v2)
-{
-  priority_queue<queue_entry_t, vector<queue_entry_t>, compare_queue> q;
-  queue_entry_t e;
-
-  for(i=0; i<this->num_v; i++) {
-    e.vertex = i+1; // this entry's vertex id
-    e.parent = i+1; // each has it as its own parent at the start
-    if(i == v1-1) {
-      // for the start node, the path_cost is initialised as 0
-      e.path_cost = 0;
-    } else {
-      // rest of the nodes, it is the max possible value
-      e.path_cost = numeric_limits<float>::max();
-    }
-
-    q.push(e);
-  }
-
-  while(q.empty() == false) {
-    e = q.top();
-
-    for(i=0; i<this->adj_list[e.vertex-1].size(); i++) {
-
-    }
-
-
-    q.pop();
-  }
-  //   retrieve the first element from the queue
-  //   check the adj list of this node and update its adjacent vertices
-}
-
-int main(int argc, char *argv[])
-{
-  router_t router;
-
-  if(argc != 2) {
-    router.usage();
-  }
-
-  if(router.read_and_parse(argv[1])) {
-    return 1;
-  }
-
-  return 0;
 }

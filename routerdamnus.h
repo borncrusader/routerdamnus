@@ -4,8 +4,11 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <set>
 #include <cstdlib>
 #include <limits>
+#include <cerrno>
+#include <cstring>
 
 using namespace std;
 
@@ -17,32 +20,36 @@ struct adj_list_entry_t
   float weight;
 };
 
-struct queue_entry_t
+struct set_entry_t
 {
   unsigned int vertex;
-  unsigned int parent;
   float path_cost;
-};
-
-class compare_queue
-{ 
-  public:
-    bool operator()(queue_entry_t, queue_entry_t);
 };
 
 class router_t
 {
   public:
-    unsigned int num_v;
-    vector < vector <adj_list_entry_t> > adj_list;
+  // member variables
+  unsigned int num_v;
+  vector < vector <adj_list_entry_t> > adj_list;
 
-    router_t();
-    void usage(void);
-    int read_and_parse(char *);
-    int insert_adj_list(unsigned int, unsigned int, float);
-    int read_adj_list();
+  // constructor and destructor
+  router_t();
+  ~router_t();
 
-    int link_state(unsigned int, unsigned int);
+  // driver functions
+  int link_state(unsigned int v1, unsigned int v2);
+  //int distance_vector(void);
+
+  // helper functions
+  //void warn(const char *msg, int err);
+  //void die(const char *msg, int err);
+
+  void link_state_usage();
+  void distance_vector_usage();
+  void read_and_parse(const char *filename);
+  int insert_adj_list(unsigned int v1, unsigned int v2, float weight);
+  int read_adj_list();
 };
 
 #endif

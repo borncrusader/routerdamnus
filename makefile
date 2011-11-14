@@ -1,4 +1,7 @@
-all:
-	g++ -g routerdamnus.cpp -o routerdamnus
+all: link_state
+
+link_state:
+	g++ -g link_state.cpp routerdamnus.cpp -o link_state
+
 clean:
-	rm -rf routerdamnus
+	rm -rf link_state
