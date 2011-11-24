@@ -1,29 +1,22 @@
 #ifndef __ROUTERDAMNUS_H__
 #define __ROUTERDAMNUS_H__
 
-#include <iostream>
-#include <fstream>
 #include <vector>
-#include <set>
-#include <cstdlib>
-#include <limits>
-#include <cerrno>
-#include <cstring>
-
-using namespace std;
 
 #define MAX_LINE 256
 
+// nodes in file start from 1, represented from 0
+
 struct adj_list_entry_t
 {
-  unsigned int vertex;
-  float weight;
+  unsigned int vertex;                        // adjacent vertex's id
+  float weight;                               // edge cost
 };
 
-struct set_entry_t
+struct queue_entry_t
 {
-  unsigned int vertex;
-  float path_cost;
+  unsigned int vertex;                        // current node's vertex
+  float path_cost;                            // current node's path cost
 };
 
 class router_t
@@ -31,21 +24,16 @@ class router_t
   public:
   // member variables
   unsigned int num_v;
-  vector < vector <adj_list_entry_t> > adj_list;
+  std::vector < std::vector <adj_list_entry_t> > adj_list;
 
   // constructor and destructor
   router_t();
   ~router_t();
 
-  // driver functions
-  int link_state(unsigned int v1, unsigned int v2);
-  //int distance_vector(void);
-
   // helper functions
   //void warn(const char *msg, int err);
   //void die(const char *msg, int err);
 
-  void link_state_usage();
   void distance_vector_usage();
   void read_and_parse(const char *filename);
   int insert_adj_list(unsigned int v1, unsigned int v2, float weight);
