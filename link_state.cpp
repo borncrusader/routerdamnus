@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <set>
 #include <limits>
 #include <cstdlib>
@@ -12,7 +13,7 @@ link_state_t::link_state_t(int vertex, int num_v)
   this->vertex = vertex;
 
   this->path_cost.reserve(num_v);
-  this->parent.reserve(num_v);
+  this->next_hop.reserve(num_v);
 }
 
 link_state_t::~link_state_t()
@@ -38,11 +39,11 @@ int link_state_t::compute_link_state(router_t& router)
   queue_entry_t top, entry;
 
   float max_float = numeric_limits<float>::max();
-  unsigned int i, vertex;
+  unsigned int i, v;
 
   for(i=0; i<router.num_v; i++) {
-    // start with parent as it's own and cost as max_float, except the source
-    this->parent[i] = i;
+    // start with next hop as its own and cost as max_float, except the source
+    this->next_hop[i] = i;
     if(i == this->vertex) {
       this->path_cost[i] = 0;
     } else {
@@ -56,24 +57,34 @@ int link_state_t::compute_link_state(router_t& router)
   while(queue.empty() == false) {
     // begin will get the smallest element
     top = *queue.begin();
-    cout<<"removing : "<<top.vertex+1<<","<<top.path_cost<<endl;
+    //cout<<"removing : "<<top.vertex+1<<","<<top.path_cost<<endl;
 
     for(i=0; i<router.adj_list[top.vertex].size(); i++) {
       // relax edges in the adj list
-      vertex = router.adj_list[top.vertex][i].vertex;
+      v = router.adj_list[top.vertex][i].vertex;
 
-      if(top.path_cost + router.adj_list[top.vertex][i].weight < this->path_cost[vertex]) {
-        cout<<"relaxing : "<<vertex<<","<<this->path_cost[vertex]<<" with "<<top.path_cost + router.adj_list[top.vertex][i].weight<<endl;
+      if(top.path_cost + router.adj_list[top.vertex][i].weight < this->path_cost[v]) {
 
-        entry.vertex = vertex;
+        //cout<<"relaxing : "<<v<<","<<this->path_cost[v]<<" with "<<top.path_cost + router.adj_list[top.vertex][i].weight<<endl;
 
-        entry.path_cost = this->path_cost[vertex];
+        entry.vertex = v;
+
+        entry.path_cost = this->path_cost[v];
         queue.erase(entry);
 
         entry.path_cost = top.path_cost + router.adj_list[top.vertex][i].weight;
-        path_cost[vertex] = entry.path_cost;
-        parent[vertex] = top.vertex;
-          
+        this->path_cost[v] = entry.path_cost;
+
+        if(top.vertex == this->vertex) {
+          // for the source node removed from the set,
+          // set the next hop as the next node
+          this->next_hop[v] = v;
+        } else {
+          // for the other nodes, the next hop will be the
+          // next hop of the parent node
+          this->next_hop[v] = this->next_hop[top.vertex];
+        }
+
         queue.insert(entry);
       }
     }
@@ -106,8 +117,18 @@ int main(int argc, char *argv[])
   l1.compute_link_state(router);
   l2.compute_link_state(router);
 
+  cout<<"cost from "<<v1<<" to "<<v2<<" : "<<l1.path_cost[v2-1]<<endl;
+
+  cout<<endl<<"routing table of "<<v1<<endl;
+  cout<<"   node   cost   next hop"<<endl;
   for(i=0;i<router.num_v;i++) {
-    cout<<i+1<<" : "<<l1.path_cost[i]<<endl;
+    cout<<setw(7)<<i+1<<"\t"<<setw(6)<<l1.path_cost[i]<<setw(11)<<l1.next_hop[i]+1<<endl;
+  }
+
+  cout<<endl<<"routing table of "<<v2<<endl;
+  cout<<"   node   cost   next hop"<<endl;
+  for(i=0;i<router.num_v;i++) {
+    cout<<setw(7)<<i+1<<"\t"<<setw(6)<<l2.path_cost[i]<<setw(11)<<l2.next_hop[i]+1<<endl;
   }
 
   return 0;

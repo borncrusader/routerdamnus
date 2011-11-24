@@ -50,7 +50,7 @@ void router_t::read_and_parse(const char *filename)
 
   is.getline(line, MAX_LINE);
   this->num_v = atoi(line);
-  printf("%d\n", this->num_v);
+  //printf("%d\n", this->num_v);
 
   this->adj_list.reserve(this->num_v);
   while(true) {
@@ -84,7 +84,7 @@ void router_t::read_and_parse(const char *filename)
     this->insert_adj_list(v2-1, v1-1, e);
   }
 
-  this->read_adj_list();
+  //this->read_adj_list();
   is.close();
 
   return;

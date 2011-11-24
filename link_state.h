@@ -10,7 +10,7 @@ class link_state_t
   int vertex;
 
   std::vector<float> path_cost;
-  std::vector<unsigned int> parent;
+  std::vector<unsigned int> next_hop;
 
   // constructor and destructor
   link_state_t(int,int);
