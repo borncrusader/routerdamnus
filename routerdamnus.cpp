@@ -34,12 +34,6 @@ void die(const char *msg, int err)
   exit(err);
 }
 
-void router_t::distance_vector_usage()
-{
-  cout<<"distance_vector initial-node file-name node1 node2"<<endl;
-  exit(1);
-}
-
 void router_t::read_and_parse(const char *filename)
 {
   int i, j;
