@@ -1,0 +1,6 @@
+initial
+port on which to bind
+neighbour1-ip neighbour1-port neighbour1-cost
+neighbour2-ip neighbour2-port neighbour2-cost
+...
+
