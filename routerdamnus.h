@@ -34,7 +34,6 @@ class router_t
   //void warn(const char *msg, int err);
   //void die(const char *msg, int err);
 
-  void distance_vector_usage();
   void read_and_parse(const char *filename);
   int insert_adj_list(unsigned int v1, unsigned int v2, float weight);
   int read_adj_list();

@@ -12,8 +12,8 @@ link_state_t::link_state_t(int vertex, int num_v)
 {
   this->vertex = vertex;
 
-  this->path_cost.reserve(num_v);
-  this->next_hop.reserve(num_v);
+  this->path_cost.resize(num_v);
+  this->next_hop.resize(num_v);
 }
 
 link_state_t::~link_state_t()
@@ -52,6 +52,7 @@ int link_state_t::compute_link_state(router_t& router)
     entry.vertex = i;
     entry.path_cost = this->path_cost[i];
     queue.insert(entry);
+    //cout<<queue.size()<<endl;
   }
 
   while(queue.empty() == false) {

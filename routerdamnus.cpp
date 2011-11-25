@@ -10,8 +10,6 @@ using namespace std;
 
 router_t::router_t()
 {
-  this->num_v = 0;
-  return;
 }
 
 router_t::~router_t()
@@ -52,7 +50,7 @@ void router_t::read_and_parse(const char *filename)
   this->num_v = atoi(line);
   //printf("%d\n", this->num_v);
 
-  this->adj_list.reserve(this->num_v);
+  this->adj_list.resize(this->num_v);
   while(true) {
     is.getline(line, MAX_LINE);
     if(is.eof()) {
