@@ -19,6 +19,7 @@ class distance_vector_t
   // driver functions
   int send_dv_neighbors(router_t&, unsigned int);
   int compute_distance_vector(router_t&, unsigned int);
+  void print_distance_vector(router_t&, unsigned int, unsigned int);
 
   static void distance_vector_usage();
 };

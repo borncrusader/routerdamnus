@@ -73,18 +73,22 @@ int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v)
     vector <int> s;
     for(i = 0 ; i < router.num_v ; i++) {
       modify = false;
+      cout<<"Node : "<<i+1<<endl;
       for(j = 0 ; j < router.num_v ; j++) {
         if(B[i][j] == false) {
           continue;
         }
         change = true;
         B[i][j] = false;
+        cout<<"\tReceived New DV From : "<<j+1<<endl;
         for(k = 0 ; k < router.num_v ; k++) {
           if(D[i][i][k] > D[i][i][j] + D[i][j][k]) {
             modify = true;
             D[i][i][k] = D[i][i][j] + D[i][j][k];
+            cout<<"\t\tChanging distance to : "<<k+1<<endl;
           }
         }
+        cout<<endl;
       }
       if(modify) {
         s.push_back(i);
@@ -96,6 +100,25 @@ int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v)
     if(change == false)
       break;
   }
+
+  cout<<"\nNumber of Iterations to Converge : "<<num_iterations<<endl;
+}
+
+void distance_vector_t::print_distance_vector(router_t& router, unsigned int v1, unsigned int v2)
+{
+  int i = 0;
+
+  cout<<"Distance Table of Node "<<v1+1<<endl;
+  for(i = 0 ; i < router.num_v ; i++) {
+    cout<<D[v1][v1][i]<<"\t";
+  }
+  cout<<endl;
+
+  cout<<"Distance Table of Node "<<v2+1<<endl;
+  for(i = 0 ; i < router.num_v ; i++) {
+    cout<<D[v2][v2][i]<<"\t";
+  }
+  cout<<endl;
 }
 
 void distance_vector_t::distance_vector_usage()
@@ -126,6 +149,8 @@ int main(int argc, char *argv[])
   distance_vector_t dv(router);
 
   dv.compute_distance_vector(router, v-1);
+
+  dv.print_distance_vector(router, v1-1, v2-1);
 
   return 0;
 }
