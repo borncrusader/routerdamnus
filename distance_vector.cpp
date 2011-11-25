@@ -51,7 +51,7 @@ int distance_vector_t::send_dv_neighbors(router_t& router, unsigned int v) {
   int i = 0, j = 0, k = 0;
 
   for(i = 0 ; i < router.adj_list[v].size() ; i++) {
-    k = router.adj_list[v][i];
+    k = router.adj_list[v][i].vertex;
     for(j = 0 ; j < router.num_v ; j++) {
       D[k][v][j] = D[v][v][j];
     }
@@ -63,9 +63,9 @@ int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v)
 {
   int i = 0, j = 0, k = 0;          // Loop Variables
   int num_iterations = 0;
-  bool change = false;
+  bool change = false, modify = false;
 
-  send_dv_neighbors(router, v-1);
+  send_dv_neighbors(router, v);
 
   while(true) {
     change = false;
@@ -123,9 +123,9 @@ int main(int argc, char *argv[])
     distance_vector_t::distance_vector_usage();
   }
 
-  distance_vector_t dv(router, v);
+  distance_vector_t dv(router);
 
-  dv.compute_distance_vector(router);
+  dv.compute_distance_vector(router, v-1);
 
   return 0;
 }
