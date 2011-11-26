@@ -115,7 +115,9 @@ int main(int argc, char *argv[])
 
   link_state_t l1(v1-1,router.num_v), l2(v2-1,router.num_v);
 
+  router.set_start_time();
   l1.compute_link_state(router);
+  router.set_end_time();
   l2.compute_link_state(router);
 
   cout<<"cost from "<<v1<<" to "<<v2<<" : "<<l1.path_cost[v2-1]<<endl;
@@ -131,6 +133,8 @@ int main(int argc, char *argv[])
   for(i=0;i<router.num_v;i++) {
     cout<<setw(7)<<i+1<<"\t"<<setw(6)<<l2.path_cost[i]<<setw(11)<<l2.next_hop[i]+1<<endl;
   }
+
+  cout<<"time to run : "<<router.get_diff_time()<<" us"<<endl;
 
   return 0;
 }

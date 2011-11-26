@@ -2,6 +2,7 @@
 #define __ROUTERDAMNUS_H__
 
 #include <vector>
+#include <sys/time.h>
 
 #define MAX_LINE 256
 
@@ -26,6 +27,9 @@ class router_t
   unsigned int num_v;
   std::vector < std::vector <adj_list_entry_t> > adj_list;
 
+  timeval start_time;
+  timeval end_time;
+
   // constructor and destructor
   router_t();
   ~router_t();
@@ -37,6 +41,10 @@ class router_t
   void read_and_parse(const char *filename);
   int insert_adj_list(unsigned int v1, unsigned int v2, float weight);
   int read_adj_list();
+
+  void set_start_time();
+  void set_end_time();
+  double get_diff_time();
 };
 
 #endif

@@ -32,7 +32,12 @@ void die(const char *msg, int err)
 
 void dv_udp_t::usage()
 {
-  cout<<"dv_udp cfg-file"<<endl;
+  cout<<"dv_udp [-f cfg-file] | [initial port nb-ip nb-port nb-cost ... ]"<<endl;
+  cout<<"       config can be given through cfg-file or"<<endl;
+  cout<<"       initial - should the node be an initial node?"<<endl;
+  cout<<"       nb-ip - neighbour's ip"<<endl;
+  cout<<"       nb-port - neighbour's port"<<endl;
+  cout<<"       nb-cost - cost to neighbour"<<endl;
   exit(1);
 }
 
@@ -67,13 +72,13 @@ void dv_udp_t::read_and_parse(const char *filename)
     s = strtok(line, " ");
     k.addr = inet_addr(s);
 
-    if(!this->lo && atoi(s) == 127) {
+    if(atoi(s) == 127) {
       // know whether it is a loopback simulation
       this->lo = 1;
     }
 
     s = strtok(NULL, " ");
-    k.port = atoi(s);
+    k.port = (short)atoi(s);
   
     s = strtok(NULL, " ");
     d.cost = atof(s);
@@ -132,15 +137,15 @@ void dv_udp_t::add_current_ip_to_dv_table()
   return;
 }
 
-int dv_table_to_buf(dv_udp_t dv_udp, unsigned char *buf)
+int dv_udp_t::dv_table_to_buf(unsigned char *buf)
 {
-  int offset = 0, len = dv_udp.dv_table.size();
+  int offset = 0, len = this->dv_table.size();
   map<table_key_t,dv_table_value_t>::iterator it;
 
   memcpy(buf+offset, &len, sizeof(int));
   offset += sizeof(int);
 
-  for(it=dv_udp.dv_table.begin(); it!=dv_udp.dv_table.end(); it++) {
+  for(it=this->dv_table.begin(); it!=this->dv_table.end(); it++) {
     memcpy(buf+offset, &((*it).first.addr), sizeof(int));
     offset += sizeof(int);
 
@@ -154,7 +159,7 @@ int dv_table_to_buf(dv_udp_t dv_udp, unsigned char *buf)
   return offset;
 }
 
-void buf_to_nb_vector(vector<nb_table_entry_t> &nb_vector, unsigned char *buf, int buf_size)
+void dv_udp_t::buf_to_nb_vector(vector<nb_table_entry_t> &nb_vector, unsigned char *buf, int buf_size)
 {
   int len, offset = 0;
   nb_table_entry_t e;
@@ -176,7 +181,7 @@ void buf_to_nb_vector(vector<nb_table_entry_t> &nb_vector, unsigned char *buf, i
   }
 }
 
-int socket_handler(dv_udp_t &dv_udp)
+int dv_udp_t::socket_handler()
 {
   int i, buf_size;
   socklen_t addr_size = sizeof(sockaddr_in);
@@ -192,30 +197,30 @@ int socket_handler(dv_udp_t &dv_udp)
   bool changed;
   int convergence = 0;
 
-  if((dv_udp.sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
+  if((this->sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
    die("dv_udp : socket creation failed!", errno);
   }
 
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = INADDR_ANY;
-  addr.sin_port = htons(dv_udp.port);
+  addr.sin_port = htons(this->port);
 
-  if(bind(dv_udp.sock, (sockaddr*)&addr, sizeof(addr)) == -1) {
-    close(dv_udp.sock);
+  if(bind(this->sock, (sockaddr*)&addr, sizeof(addr)) == -1) {
+    close(this->sock);
     die("dv_udp : bind failed!", errno);
   }
 
-  if(dv_udp.initial) {
+  if(this->initial) {
     // go on and send my dv to all neighbours
-    buf_size = dv_table_to_buf(dv_udp, buf);
+    buf_size = this->dv_table_to_buf(buf);
 
-    for(nb_it = dv_udp.nb_table.begin(); nb_it!=dv_udp.nb_table.end(); nb_it++) {
+    for(nb_it = this->nb_table.begin(); nb_it!=this->nb_table.end(); nb_it++) {
       addr.sin_family = AF_INET;
       addr.sin_addr.s_addr = (*nb_it).first.addr;
       addr.sin_port = htons((*nb_it).first.port);
 
-      if(sendto(dv_udp.sock,buf,buf_size,0,(sockaddr*)&addr,addr_size) == -1) {
-        close(dv_udp.sock);
+      if(sendto(this->sock,buf,buf_size,0,(sockaddr*)&addr,addr_size) == -1) {
+        close(this->sock);
         die("dv_udp : sendto failed!", errno);
         return 1;
       }
@@ -227,21 +232,21 @@ int socket_handler(dv_udp_t &dv_udp)
     addr_size = sizeof(sockaddr_in);
     nb_vector.clear();
 
-    buf_size = recvfrom(dv_udp.sock,buf,1400,0,(sockaddr*)&addr,&addr_size);
-    buf_to_nb_vector(nb_vector, buf, buf_size);
+    buf_size = recvfrom(this->sock,buf,1400,0,(sockaddr*)&addr,&addr_size);
+    this->buf_to_nb_vector(nb_vector, buf, buf_size);
 
     neighbour.addr = addr.sin_addr.s_addr;
     neighbour.port = ntohs(addr.sin_port);
-    nb_it = dv_udp.nb_table.find(neighbour);
+    nb_it = this->nb_table.find(neighbour);
 
     cout<<"received dv-vector from "<<inet_ntoa(addr.sin_addr)<<":"<<neighbour.port<<endl;
 
-    if(nb_it == dv_udp.nb_table.end()) {
+    if(nb_it == this->nb_table.end()) {
       // vector from unknown neighbour!!
-      cout<<"howl!"<<" "<<dv_udp.nb_table.size()<<endl;
+      cout<<"howl!"<<" "<<this->nb_table.size()<<endl;
       cout<<neighbour.addr<<" "<<neighbour.port<<endl;
       map<table_key_t, nb_table_value_t>::iterator temp_it;
-      for(temp_it=dv_udp.nb_table.begin(); temp_it!=dv_udp.nb_table.end(); temp_it++) {
+      for(temp_it=this->nb_table.begin(); temp_it!=this->nb_table.end(); temp_it++) {
         cout<<(*temp_it).first.addr<<" "<<(*temp_it).first.port<<endl;
       }
       continue;
@@ -250,18 +255,18 @@ int socket_handler(dv_udp_t &dv_udp)
     for(i=0; i<nb_vector.size(); i++) {
       key.addr = nb_vector[i].addr;
       key.port = nb_vector[i].port;
-      dv_it = dv_udp.dv_table.find(key);
+      dv_it = this->dv_table.find(key);
 
       display_addr.s_addr = nb_vector[i].addr;
       cout<<i+1<<" "<<inet_ntoa(display_addr)<<":"<<nb_vector[i].port<<" "<<nb_vector[i].cost<<endl;
 
-      if(dv_it == dv_udp.dv_table.end()) {
+      if(dv_it == this->dv_table.end()) {
         // add new entries to my dv table
         d_value.cost = nb_vector[i].cost;
         d_value.nexthop_addr = neighbour.addr;
         d_value.nexthop_port = neighbour.port;
 
-        dv_udp.dv_table[key] = d_value;
+        this->dv_table[key] = d_value;
         changed = true;
       } else {
         if(nb_vector[i].cost + (*nb_it).second.cost < (*dv_it).second.cost)  {
@@ -275,26 +280,27 @@ int socket_handler(dv_udp_t &dv_udp)
     }
 
     // send my dv table
-    buf_size = dv_table_to_buf(dv_udp, buf);
+    buf_size = this->dv_table_to_buf(buf);
 
-    for(nb_it = dv_udp.nb_table.begin(); nb_it!=dv_udp.nb_table.end(); nb_it++) {
+    for(nb_it = this->nb_table.begin(); nb_it!=this->nb_table.end(); nb_it++) {
       addr.sin_family = AF_INET;
       addr.sin_addr.s_addr = (*nb_it).first.addr;
       addr.sin_port = htons((*nb_it).first.port);
 
-      if(sendto(dv_udp.sock,buf,buf_size,0,(sockaddr*)&addr,addr_size) == -1) {
-        close(dv_udp.sock);
+      if(sendto(this->sock,buf,buf_size,0,(sockaddr*)&addr,addr_size) == -1) {
+        close(this->sock);
         die("dv_udp : sendto failed!", errno);
         return 1;
       }
     }
 
+    convergence++;
     if(changed == false) {
-      //convergence++;
-      //// convergence threshold = 10
-      //if(convergence == 10)
-      cout<<"converged!"<<endl;
-      break;
+      // convergence threshold = 5
+      if(convergence > this->nb_table.size()) {
+        cout<<"converged!"<<endl;
+        break;
+      }
     } else {
       convergence = 0;
     }
@@ -304,7 +310,7 @@ int socket_handler(dv_udp_t &dv_udp)
   cout<<setw(21)<<"destination"<<" ";
   cout<<setw(10)<<"cost"<<" ";
   cout<<setw(22)<<"next hop"<<" "<<endl;
-  for(dv_it=dv_udp.dv_table.begin(); dv_it!=dv_udp.dv_table.end(); dv_it++) {
+  for(dv_it=this->dv_table.begin(); dv_it!=this->dv_table.end(); dv_it++) {
     display_addr.s_addr = (*dv_it).first.addr;
     cout<<setw(15)<<inet_ntoa(display_addr)<<":";
     cout<<setw(5)<<(*dv_it).first.port<<" ";
@@ -320,16 +326,41 @@ int socket_handler(dv_udp_t &dv_udp)
 int main(int argc, char *argv[])
 {
   dv_udp_t dv_udp;
+  table_key_t k;
+  dv_table_value_t d;
+  nb_table_value_t n;
   int i;
 
-  if(argc < 2) {
+  if(argc < 3 || argc%3 != 0) {
     dv_udp.usage();
   }
 
-  dv_udp.read_and_parse(argv[1]);
+  if(!strcmp(argv[1], "-f")) {
+    dv_udp.read_and_parse(argv[2]);
+  } else {
+    dv_udp.initial = (bool)atoi(argv[1]);
+    dv_udp.port = (short)atoi(argv[2]);
+
+    for(i=3; i<argc; i+=3) {
+      k.addr = inet_addr(argv[i]);
+      k.port = (short)atoi(argv[i+1]);
+      d.cost = atof(argv[i+2]);
+      d.nexthop_addr = k.addr;
+      d.nexthop_port = k.port;
+      dv_udp.dv_table[k] = d;
+
+      n.cost = d.cost;
+      dv_udp.nb_table[k] = n;
+
+      if(atoi(argv[i]) == 127) {
+        dv_udp.lo = 1;
+      }
+    }
+  }
+
   dv_udp.add_current_ip_to_dv_table();
 
-  socket_handler(dv_udp);
+  dv_udp.socket_handler();
 
   return 0;
 }

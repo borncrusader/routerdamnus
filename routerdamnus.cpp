@@ -115,3 +115,19 @@ int router_t::read_adj_list()
 
   return 1;
 }
+
+void router_t::set_start_time()
+{
+  gettimeofday(&(this->start_time), NULL);
+}
+
+void router_t::set_end_time()
+{
+  gettimeofday(&(this->end_time), NULL);
+}
+
+double router_t::get_diff_time()
+{
+  return (this->end_time.tv_sec*1000000+this->end_time.tv_usec)-
+    (this->start_time.tv_sec*1000000+this->start_time.tv_usec);
+}

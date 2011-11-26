@@ -59,6 +59,11 @@ class dv_udp_t
   void usage();
   void read_and_parse(const char *filename);
   void add_current_ip_to_dv_table();
+
+  int dv_table_to_buf(unsigned char *buf);
+  void buf_to_nb_vector(vector<nb_table_entry_t> &nb_vector, unsigned char *buf, int buf_size);
+
+  int socket_handler();
 };
 
 #endif
