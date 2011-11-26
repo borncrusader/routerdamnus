@@ -65,7 +65,8 @@ int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v)
   int num_iterations = 0;
   bool change = false, modify = false;
 
-  send_dv_neighbors(router, v);
+  for(i = 0 ; i < router.num_v ; i++)
+    send_dv_neighbors(router, i);
 
   while(true) {
     change = false;
