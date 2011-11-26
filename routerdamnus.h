@@ -45,6 +45,7 @@ class router_t
   void set_start_time();
   void set_end_time();
   double get_diff_time();
+  double get_cpu_time();
 };
 
 #endif

@@ -3,6 +3,7 @@
 #include <cerrno>
 #include <cstring>
 #include <cstdlib>
+#include <sys/resource.h>
 
 #include "routerdamnus.h"
 
@@ -130,4 +131,14 @@ double router_t::get_diff_time()
 {
   return (this->end_time.tv_sec*1000000+this->end_time.tv_usec)-
     (this->start_time.tv_sec*1000000+this->start_time.tv_usec);
+}
+
+double router_t::get_cpu_time()
+{
+  rusage usage;
+
+  getrusage(RUSAGE_SELF, &usage);
+
+  cout<<usage.ru_utime.tv_sec<<"."<<usage.ru_utime.tv_usec<<endl;
+  cout<<usage.ru_stime.tv_sec<<"."<<usage.ru_stime.tv_usec<<endl;
 }
