@@ -78,23 +78,23 @@ int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v)
     vector <int> s;
     for(i = 0 ; i < router.num_v ; i++) {
       modify = false;
-      cout<<"Node : "<<i+1<<endl;
+      //cout<<"Node : "<<i+1<<endl;
       for(j = 0 ; j < router.num_v ; j++) {
         if(B[i][j] == false) {
           continue;
         }
         change = true;
         B[i][j] = false;
-        cout<<"\tReceived New DV From : "<<j+1<<endl;
+        //cout<<"\tReceived New DV From : "<<j+1<<endl;
         for(k = 0 ; k < router.num_v ; k++) {
           if(D[i][i][k] > D[i][i][j] + D[i][j][k]) {
             modify = true;
             D[i][i][k] = D[i][i][j] + D[i][j][k];
             N[i][k] = j;
-            cout<<"\t\tChanging distance to : "<<k+1<<endl;
+            //cout<<"\t\tChanging distance to : "<<k+1<<endl;
           }
         }
-        cout<<endl;
+        //cout<<endl;
       }
       if(modify) {
         s.push_back(i);
@@ -114,17 +114,19 @@ void distance_vector_t::print_distance_vector(router_t& router, unsigned int v1,
 {
   int i = 0;
 
-  cout<<"Distance Table of Node "<<v1+1<<endl;
-  cout<<"--------------------------\n";
+  cout<<"Routing Table of Node "<<v1+1<<endl;
+  cout<<"------------------------\n";
+  cout<<"Node\tCost\tNext Hop\n";
   for(i = 0 ; i < router.num_v ; i++) {
-    cout<<"Node "<<i+1<<"\t"<<D[v1][v1][i]<<"\t"<<N[v1][i]+1<<endl;
+    cout<<i+1<<"\t"<<D[v1][v1][i]<<"\t"<<N[v1][i]+1<<endl;
   }
   cout<<endl;
 
-  cout<<"Distance Table of Node "<<v2+1<<endl;
-  cout<<"--------------------------\n";
+  cout<<"Routing Table of Node "<<v2+1<<endl;
+  cout<<"------------------------\n";
+  cout<<"Node\tCost\tNext Hop\n";
   for(i = 0 ; i < router.num_v ; i++) {
-    cout<<"Node "<<i+1<<"\t"<<D[v2][v2][i]<<"\t"<<N[v2][i]+1<<endl;
+    cout<<i+1<<"\t"<<D[v2][v2][i]<<"\t"<<N[v2][i]+1<<endl;
   }
   cout<<endl;
 }
