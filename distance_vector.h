@@ -10,6 +10,7 @@ class distance_vector_t
   public:
   // member variables
   vector < vector < vector<float> > > D;
+  vector < vector <unsigned int> > N;
   vector < vector<bool> > B;
 
   // constructor and destructor

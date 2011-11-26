@@ -14,6 +14,7 @@ distance_vector_t::distance_vector_t(router_t& router)
 
   max = numeric_limits<float>::max();
 
+  N.resize(router.num_v, vector<unsigned int>(router.num_v, 0));
   B.resize(router.num_v, vector<bool>(router.num_v, false));
 
   for(i = 0 ; i < router.num_v ; i++) {
@@ -21,8 +22,10 @@ distance_vector_t::distance_vector_t(router_t& router)
     for(j = 0 ; j < router.num_v ; j++) {
       D[i].push_back(vector<float>());
       for(k = 0 ; k < router.num_v ; k++) {
-        if(i==j && j==k)
+        if(i==j && j==k) {
           D[i][j].push_back(0);
+          N[i][j] = i;
+        }
         else
           D[i][j].push_back(max);
       }
@@ -34,6 +37,7 @@ distance_vector_t::distance_vector_t(router_t& router)
       entry.vertex = router.adj_list[i][j].vertex;
       entry.weight = router.adj_list[i][j].weight;
       D[i][i][entry.vertex] = entry.weight;
+      N[i][entry.vertex] = entry.vertex;
     }
   }
 
@@ -86,6 +90,7 @@ int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v)
           if(D[i][i][k] > D[i][i][j] + D[i][j][k]) {
             modify = true;
             D[i][i][k] = D[i][i][j] + D[i][j][k];
+            N[i][k] = j;
             cout<<"\t\tChanging distance to : "<<k+1<<endl;
           }
         }
@@ -110,14 +115,16 @@ void distance_vector_t::print_distance_vector(router_t& router, unsigned int v1,
   int i = 0;
 
   cout<<"Distance Table of Node "<<v1+1<<endl;
+  cout<<"--------------------------\n";
   for(i = 0 ; i < router.num_v ; i++) {
-    cout<<D[v1][v1][i]<<"\t";
+    cout<<"Node "<<i+1<<"\t"<<D[v1][v1][i]<<"\t"<<N[v1][i]+1<<endl;
   }
   cout<<endl;
 
   cout<<"Distance Table of Node "<<v2+1<<endl;
+  cout<<"--------------------------\n";
   for(i = 0 ; i < router.num_v ; i++) {
-    cout<<D[v2][v2][i]<<"\t";
+    cout<<"Node "<<i+1<<"\t"<<D[v2][v2][i]<<"\t"<<N[v2][i]+1<<endl;
   }
   cout<<endl;
 }
