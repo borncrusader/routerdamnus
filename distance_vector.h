@@ -21,6 +21,9 @@ class distance_vector_t
   int send_dv_neighbors(router_t&, unsigned int);
   int compute_distance_vector(router_t&, unsigned int);
   void print_distance_vector(router_t&, unsigned int, unsigned int);
+  void print_all_distance_vector_table(router_t&);
+  void print_all_distance_vector(router_t&);
+  void print_adj_list(router_t&);
 
   static void distance_vector_usage();
 };

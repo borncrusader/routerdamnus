@@ -68,6 +68,7 @@ int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v)
   int i = 0, j = 0, k = 0;          // Loop Variables
   int num_iterations = 0;
   bool change = false, modify = false;
+  int max = numeric_limits<float>::max();
 
   for(i = 0 ; i < router.num_v ; i++)
     send_dv_neighbors(router, i);
@@ -101,7 +102,7 @@ int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v)
       }
     }
     for(i = 0 ; i < s.size() ; i++) {
-      send_dv_neighbors(router, i);
+      send_dv_neighbors(router,s[i]);
     }
     if(change == false)
       break;
@@ -131,6 +132,46 @@ void distance_vector_t::print_distance_vector(router_t& router, unsigned int v1,
   cout<<endl;
 }
 
+void distance_vector_t::print_all_distance_vector(router_t& router)
+{
+  int i = 0, j = 0;
+  for(i = 0 ; i < router.num_v ; i++) {
+    cout<<"DV of Node "<<i+1<<endl;
+    for(j = 0 ; j < router.num_v ; j++) {
+      cout<<D[i][i][j]<<"  ";
+    }
+    cout<<endl;
+  }
+}
+
+void distance_vector_t::print_all_distance_vector_table(router_t& router)
+{
+  int i = 0, j = 0, k = 0;
+  int max = numeric_limits<float>::max();
+  for(i = 0 ; i < router.num_v ; i++) {
+    cout<<"DV of Node "<<i+1<<endl;
+    for(j = 0 ; j < router.num_v ; j++) {
+      for(k = 0 ; k < router.num_v ; k++) {
+        cout<<D[i][j][k]<<"  ";
+      }
+      cout<<endl;
+    }
+    cout<<endl;
+  }
+}
+
+void distance_vector_t::print_adj_list(router_t& router)
+{
+  int i = 0, j = 0;
+  for(i = 0 ; i < router.num_v ; i++) {
+    cout<<i+1<<":";
+    for(j = 0 ; j < router.adj_list[i].size() ; j++) {
+      cout<<router.adj_list[i][j].vertex<<",";
+    }
+    cout<<endl;
+  }
+}
+
 void distance_vector_t::distance_vector_usage()
 {
   cout<<"distance_vector initial-node file-name node1 node2"<<endl;
@@ -158,9 +199,17 @@ int main(int argc, char *argv[])
 
   distance_vector_t dv(router);
 
+  //dv.print_adj_list(router);
+
   dv.compute_distance_vector(router, v-1);
 
+  cout<<"cost from "<<v1<<" to "<<v2<<" : "<<dv.D[v1-1][v1-1][v2-1]<<endl;
+
   dv.print_distance_vector(router, v1-1, v2-1);
+
+  //dv.print_all_distance_vector_table(router);
+
+  //dv.print_all_distance_vector(router);
 
   return 0;
 }
