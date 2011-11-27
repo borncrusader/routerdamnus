@@ -123,6 +123,17 @@ int main(int argc, char *argv[])
 
   cout<<"cost from "<<v1<<" to "<<v2<<" : "<<l1.path_cost[v2-1]<<endl;
 
+  /*cout<<"Cost table of "<<v1<<endl;
+  for(i=0;i<router.num_v;i++) {
+    cout<<l1.path_cost[i]<<" ";
+  }
+  cout<<endl;
+
+  cout<<"Cost table of "<<v2<<endl;
+  for(i=0;i<router.num_v;i++) {
+    cout<<l2.path_cost[i]<<" ";
+  }
+  cout<<endl;*/
   cout<<endl<<"routing table of "<<v1<<endl;
   cout<<"   node   cost   next hop"<<endl;
   for(i=0;i<router.num_v;i++) {
