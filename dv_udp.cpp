@@ -262,7 +262,7 @@ int dv_udp_t::socket_handler()
 
       if(dv_it == this->dv_table.end()) {
         // add new entries to my dv table
-        d_value.cost = nb_vector[i].cost;
+        d_value.cost = nb_vector[i].cost + (*nb_it).second.cost;
         d_value.nexthop_addr = neighbour.addr;
         d_value.nexthop_port = neighbour.port;
 
@@ -294,10 +294,10 @@ int dv_udp_t::socket_handler()
       }
     }
 
-    convergence++;
     if(changed == false) {
+      convergence++;
       // convergence threshold = 5
-      if(convergence > this->nb_table.size()) {
+      if(convergence > 100) {
         cout<<"converged!"<<endl;
         break;
       }
