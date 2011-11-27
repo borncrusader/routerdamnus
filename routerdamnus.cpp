@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <fstream>
 #include <cerrno>
 #include <cstring>
@@ -35,10 +36,10 @@ void die(const char *msg, int err)
 
 void router_t::read_and_parse(const char *filename)
 {
-  int i, j;
   unsigned int v1, v2;
   float e;
-  char line[MAX_LINE], c[MAX_LINE];
+  char line[MAX_LINE];
+  char *s;
   ifstream is;
 
   is.open(filename, ios::in);
@@ -52,33 +53,25 @@ void router_t::read_and_parse(const char *filename)
   //printf("%d\n", this->num_v);
 
   this->adj_list.resize(this->num_v);
-  while(true) {
+  while(!is.eof()) {
     is.getline(line, MAX_LINE);
-    if(is.eof()) {
+
+    if(line == NULL)
+      cout<<"NULL line"<<endl;
+    s = strtok(line, " ");
+    if(s == NULL) {
+      cout<<"breaking"<<endl;
       break;
     }
+    v1 = atoi(s);
 
-    for(i=0; line[i] >= '0' && line[i] <= '9'; i++) {
-      c[i] = line[i];
-    }
-    c[i] = '\0';
-    v1 = atoi(c);
+    s = strtok(NULL, " ");
+    v2 = atoi(s);
 
-    for(; line[i] < '0' || line[i] > '9'; i++);
-    for(j=0; line[i] >= '0' && line[i] <= '9'; j++, i++) {
-      c[j] = line[i];
-    }
-    c[j] = '\0';
-    v2 = atoi(c);
+    s = strtok(NULL, " ");
+    e = atof(s);
 
-    for(; (line[i] < '0' || line[i] > '9') && line[i] != '.'; i++);
-    for(j=0; (line[i] >= '0' && line[i] <= '9') || line[i] == '.'; j++, i++) {
-      c[j] = line[i];
-    }
-    c[j] = '\0';
-    e = atof(c);
-
-    //printf("v1 : %d, v2 : %d, e : %f\n", v1, v2, e);
+    printf("v1 : %d, v2 : %d, e : %f\n", v1, v2, e);
     this->insert_adj_list(v1-1, v2-1, e);
     this->insert_adj_list(v2-1, v1-1, e);
   }
