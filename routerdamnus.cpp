@@ -56,12 +56,10 @@ void router_t::read_and_parse(const char *filename)
   while(!is.eof()) {
     is.getline(line, MAX_LINE);
 
-    if(line == NULL)
-      cout<<"NULL line"<<endl;
     s = strtok(line, " ");
     if(s == NULL) {
-      cout<<"breaking"<<endl;
-      break;
+      //cout<<"breaking"<<endl;
+      continue;
     }
     v1 = atoi(s);
 
@@ -71,7 +69,7 @@ void router_t::read_and_parse(const char *filename)
     s = strtok(NULL, " ");
     e = atof(s);
 
-    printf("v1 : %d, v2 : %d, e : %f\n", v1, v2, e);
+    //printf("v1 : %d, v2 : %d, e : %f\n", v1, v2, e);
     this->insert_adj_list(v1-1, v2-1, e);
     this->insert_adj_list(v2-1, v1-1, e);
   }

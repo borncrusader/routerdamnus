@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
   struct timespec tp;
 
   clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &tp);
-  cout<<tp.tv_sec<<"s and "<<tp.tv_nsec<<"ns"<<endl;
+  cout<<endl<<"time to run : "<<tp.tv_sec<<"s and "<<tp.tv_nsec<<"ns"<<endl;
 
   return 0;
 }
