@@ -16,6 +16,7 @@ distance_vector_t::distance_vector_t(router_t& router)
 
   N.resize(router.num_v, vector<unsigned int>(router.num_v, 0));
   B.resize(router.num_v, vector<bool>(router.num_v, false));
+  M.resize(router.num_v, 0);
 
   for(i = 0 ; i < router.num_v ; i++) {
     D.push_back(vector< vector <float> >());
@@ -75,7 +76,7 @@ int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v)
 
   while(true) {
     change = false;
-    ++num_iterations;
+    //++num_iterations;
     vector <int> s;
     for(i = 0 ; i < router.num_v ; i++) {
       modify = false;
@@ -99,6 +100,7 @@ int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v)
       }
       if(modify) {
         s.push_back(i);
+        ++M[i];
       }
     }
     for(i = 0 ; i < s.size() ; i++) {
@@ -108,7 +110,13 @@ int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v)
       break;
   }
 
-  cout<<"\nNumber of Iterations to Converge : "<<num_iterations<<endl;
+  for(i = 0 ; i < router.num_v ; i++) {
+    if(M[i] > num_iterations) {
+      num_iterations = M[i];
+    }
+  }
+
+  cout<<"\nNumber of Iterations to Converge : "<<num_iterations<<endl<<endl;
 }
 
 void distance_vector_t::print_distance_vector(router_t& router, unsigned int v1, unsigned int v2)
@@ -203,7 +211,7 @@ int main(int argc, char *argv[])
 
   dv.compute_distance_vector(router, v-1);
 
-  cout<<"cost from "<<v1<<" to "<<v2<<" : "<<dv.D[v1-1][v1-1][v2-1]<<endl;
+  cout<<"Cost from "<<v1<<" to "<<v2<<" : "<<dv.D[v1-1][v1-1][v2-1]<<endl<<endl;
 
   dv.print_distance_vector(router, v1-1, v2-1);
 

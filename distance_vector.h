@@ -9,9 +9,10 @@ class distance_vector_t
 {
   public:
   // member variables
-  vector < vector < vector<float> > > D;
-  vector < vector <unsigned int> > N;
-  vector < vector<bool> > B;
+  vector < vector < vector<float> > > D; // DV Table for each node
+  vector < vector <unsigned int> > N; // Neighbor Array
+  vector < vector<bool> > B; // Flag array
+  vector <int> M;           // Track the number of iterations 
 
   // constructor and destructor
   distance_vector_t(router_t&);
