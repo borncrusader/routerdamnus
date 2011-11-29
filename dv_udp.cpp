@@ -35,6 +35,7 @@ void dv_udp_t::usage()
   cout<<"dv_udp [-f cfg-file] | [initial port nb-ip nb-port nb-cost ... ]"<<endl;
   cout<<"       config can be given through cfg-file or"<<endl;
   cout<<"       initial - should the node be an initial node?"<<endl;
+  cout<<"       port - listening port of the node"<<endl;
   cout<<"       nb-ip - neighbour's ip"<<endl;
   cout<<"       nb-port - neighbour's port"<<endl;
   cout<<"       nb-cost - cost to neighbour"<<endl;
@@ -239,7 +240,7 @@ int dv_udp_t::socket_handler()
     neighbour.port = ntohs(addr.sin_port);
     nb_it = this->nb_table.find(neighbour);
 
-    cout<<"received dv-vector from "<<inet_ntoa(addr.sin_addr)<<":"<<neighbour.port<<endl;
+    //cout<<"received dv-vector from "<<inet_ntoa(addr.sin_addr)<<":"<<neighbour.port<<endl;
 
     if(nb_it == this->nb_table.end()) {
       // vector from unknown neighbour!!
@@ -258,7 +259,7 @@ int dv_udp_t::socket_handler()
       dv_it = this->dv_table.find(key);
 
       display_addr.s_addr = nb_vector[i].addr;
-      cout<<i+1<<" "<<inet_ntoa(display_addr)<<":"<<nb_vector[i].port<<" "<<nb_vector[i].cost<<endl;
+      //cout<<i+1<<" "<<inet_ntoa(display_addr)<<":"<<nb_vector[i].port<<" "<<nb_vector[i].cost<<endl;
 
       if(dv_it == this->dv_table.end()) {
         // add new entries to my dv table
@@ -297,8 +298,8 @@ int dv_udp_t::socket_handler()
     if(changed == false) {
       convergence++;
       // convergence threshold = 5
-      if(convergence > 100) {
-        cout<<"converged!"<<endl;
+      if(convergence > this->nb_table.size()) {
+        //cout<<"converged!"<<endl;
         break;
       }
     } else {
