@@ -113,12 +113,12 @@ void dv_udp_t::add_current_ip_to_dv_table()
 
   for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
     if(ifa->ifa_addr->sa_family == AF_INET) {
-      if (getnameinfo(ifa->ifa_addr, sizeof(sockaddr_in), host, NI_MAXHOST,
-              NULL, 0, NI_NUMERICHOST)) {
-        die("add_current_ip : getnameinfo() failed ", errno);
-      }
+      //if (getnameinfo(ifa->ifa_addr, sizeof(sockaddr_in), host, NI_MAXHOST,
+      //        NULL, 0, NI_NUMERICHOST)) {
+      //  die("add_current_ip : getnameinfo() failed ", errno);
+      //}
 
-      k.addr = inet_addr(host);
+      k.addr = ((sockaddr_in*)ifa->ifa_addr)->sin_addr.s_addr;
       k.port = this->port;
 
       d.cost = 0;
