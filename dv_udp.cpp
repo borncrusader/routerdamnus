@@ -195,7 +195,7 @@ int dv_udp_t::socket_handler()
   map<table_key_t, nb_table_value_t>::iterator nb_it;
   dv_table_value_t d_value;
   nb_table_value_t n_value;
-  bool changed, sent = false;
+  bool changed, first_run = true;
   int convergence = 0;
 
   if((this->sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
@@ -281,7 +281,7 @@ int dv_udp_t::socket_handler()
     }
 
     // send my dv table
-    if(!sent || changed == true) {
+    if(first_run || changed == true) {
       buf_size = this->dv_table_to_buf(buf);
 
       for(nb_it = this->nb_table.begin(); nb_it!=this->nb_table.end(); nb_it++) {
@@ -295,19 +295,20 @@ int dv_udp_t::socket_handler()
           return 1;
         }
       }
-      sent = true;
     }
 
-    if(changed == false) {
+    if(!first_run && changed == false) {
       convergence++;
       // convergence threshold = 5
-      if(convergence > this->nb_table.size()) {
+      //if(convergence > this->nb_table.size()) {
         //cout<<"converged!"<<endl;
         break;
-      }
+      //}
     } else {
       convergence = 0;
     }
+
+    first_run = false;
   }
 
   cout<<"forwarding table"<<endl;
