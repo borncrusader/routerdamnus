@@ -122,7 +122,7 @@ void dv_udp_t::add_current_ip_to_dv_table()
       k.port = this->port;
 
       d.cost = 0;
-      d.nexthop_addr = inet_addr(host);
+      d.nexthop_addr = k.addr;
       d.nexthop_port = this->port;
 
       if(this->lo && !strcmp(ifa->ifa_name, "lo")) {
@@ -177,8 +177,6 @@ void dv_udp_t::buf_to_nb_vector(vector<nb_table_entry_t> &nb_vector, unsigned ch
 
     memcpy(&(e.cost), buf+offset, sizeof(float));
     offset += sizeof(float);
-
-    cout<<e.addr<<" "<<e.port<<" "<<e.cost<<endl;
 
     nb_vector.push_back(e);
   }
