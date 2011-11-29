@@ -9,13 +9,15 @@ class distance_vector_t
 {
   public:
   // member variables
+  bool rflag;
   vector < vector < vector<float> > > D; // DV Table for each node
   vector < vector <unsigned int> > N; // Neighbor Array
   vector < vector<bool> > B; // Flag array
   vector <int> M;           // Track the number of iterations 
+  vector <bool> I;          // Tracks the iteration 0
 
   // constructor and destructor
-  distance_vector_t(router_t&);
+  distance_vector_t(router_t&, bool);
   ~distance_vector_t();
 
   // driver functions

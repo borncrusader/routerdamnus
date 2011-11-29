@@ -1,12 +1,13 @@
 #include <iostream>
 #include <cstdlib>
+#include <cstring>
 #include <limits>
 #include "routerdamnus.h"
 #include "distance_vector.h"
 
 using namespace std;
 
-distance_vector_t::distance_vector_t(router_t& router)
+distance_vector_t::distance_vector_t(router_t& router, bool flag)
 {
   int i = 0, j = 0, k = 0;
   float max;
@@ -17,6 +18,14 @@ distance_vector_t::distance_vector_t(router_t& router)
   N.resize(router.num_v, vector<unsigned int>(router.num_v, 0));
   B.resize(router.num_v, vector<bool>(router.num_v, false));
   M.resize(router.num_v, 0);
+
+  if(flag == true) {
+    rflag = true;
+  }
+  else {
+    rflag = false;
+    I.resize(router.num_v, true);
+  }
 
   for(i = 0 ; i < router.num_v ; i++) {
     D.push_back(vector< vector <float> >());
@@ -71,8 +80,13 @@ int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v)
   bool change = false, modify = false;
   int max = numeric_limits<float>::max();
 
-  for(i = 0 ; i < router.num_v ; i++)
-    send_dv_neighbors(router, i);
+  if(rflag) {
+    for(i = 0 ; i < router.num_v ; i++)
+      send_dv_neighbors(router, i);
+  }
+  else {
+    send_dv_neighbors(router, v);
+  }
 
   while(true) {
     change = false;
@@ -80,11 +94,12 @@ int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v)
     vector <int> s;
     for(i = 0 ; i < router.num_v ; i++) {
       modify = false;
-      //cout<<"Node : "<<i+1<<endl;
+      //cout<<"\nNode : "<<i+1;
       for(j = 0 ; j < router.num_v ; j++) {
         if(B[i][j] == false) {
           continue;
         }
+        //cout<<"NAN="<<j+1<<" ";
         change = true;
         B[i][j] = false;
         //cout<<"\tReceived New DV From : "<<j+1<<endl;
@@ -98,11 +113,17 @@ int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v)
         }
         //cout<<endl;
       }
-      if(modify) {
+      if(!rflag && (modify || I[i])) {
+        s.push_back(i);
+        I[i] = false;
+        ++M[i];
+      }
+      else if(rflag && modify) {
         s.push_back(i);
         ++M[i];
       }
     }
+
     for(i = 0 ; i < s.size() ; i++) {
       send_dv_neighbors(router,s[i]);
     }
@@ -182,12 +203,13 @@ void distance_vector_t::print_adj_list(router_t& router)
 
 void distance_vector_t::distance_vector_usage()
 {
-  cout<<"distance_vector initial-node file-name node1 node2"<<endl;
+  cout<<"distance_vector [initial-node]|[-r] file-name node1 node2"<<endl;
   exit(1);
 }
 
 int main(int argc, char *argv[])
 {
+  bool flag = false;
   router_t router;
   unsigned int v1, v2, v;
 
@@ -195,7 +217,11 @@ int main(int argc, char *argv[])
     distance_vector_t::distance_vector_usage();
   }
 
-  v = atoi(argv[1]);
+  if(!strcmp(argv[1], "-r"))
+    flag = true;
+  else
+    v = atoi(argv[1]);
+
   router.read_and_parse(argv[2]);
 
   v1 = atoi(argv[3]);
@@ -205,7 +231,7 @@ int main(int argc, char *argv[])
     distance_vector_t::distance_vector_usage();
   }
 
-  distance_vector_t dv(router);
+  distance_vector_t dv(router, flag);
 
   //dv.print_adj_list(router);
 
