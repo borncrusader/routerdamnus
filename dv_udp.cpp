@@ -178,6 +178,8 @@ void dv_udp_t::buf_to_nb_vector(vector<nb_table_entry_t> &nb_vector, unsigned ch
     memcpy(&(e.cost), buf+offset, sizeof(float));
     offset += sizeof(float);
 
+    cout<<e.addr<<" "<<e.port<<" "<<e.cost<<endl;
+
     nb_vector.push_back(e);
   }
 }
@@ -195,7 +197,7 @@ int dv_udp_t::socket_handler()
   map<table_key_t, nb_table_value_t>::iterator nb_it;
   dv_table_value_t d_value;
   nb_table_value_t n_value;
-  bool changed;
+  bool changed, sent = false;
   int convergence = 0;
 
   if((this->sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
@@ -281,18 +283,21 @@ int dv_udp_t::socket_handler()
     }
 
     // send my dv table
-    buf_size = this->dv_table_to_buf(buf);
+    if(!sent || changed == true) {
+      buf_size = this->dv_table_to_buf(buf);
 
-    for(nb_it = this->nb_table.begin(); nb_it!=this->nb_table.end(); nb_it++) {
-      addr.sin_family = AF_INET;
-      addr.sin_addr.s_addr = (*nb_it).first.addr;
-      addr.sin_port = htons((*nb_it).first.port);
+      for(nb_it = this->nb_table.begin(); nb_it!=this->nb_table.end(); nb_it++) {
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = (*nb_it).first.addr;
+        addr.sin_port = htons((*nb_it).first.port);
 
-      if(sendto(this->sock,buf,buf_size,0,(sockaddr*)&addr,addr_size) == -1) {
-        close(this->sock);
-        die("dv_udp : sendto failed!", errno);
-        return 1;
+        if(sendto(this->sock,buf,buf_size,0,(sockaddr*)&addr,addr_size) == -1) {
+          close(this->sock);
+          die("dv_udp : sendto failed!", errno);
+          return 1;
+        }
       }
+      sent = true;
     }
 
     if(changed == false) {
