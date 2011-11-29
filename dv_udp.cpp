@@ -240,7 +240,7 @@ int dv_udp_t::socket_handler()
     neighbour.port = ntohs(addr.sin_port);
     nb_it = this->nb_table.find(neighbour);
 
-    //cout<<"received dv-vector from "<<inet_ntoa(addr.sin_addr)<<":"<<neighbour.port<<endl;
+    cout<<"received dv-vector from "<<inet_ntoa(addr.sin_addr)<<":"<<neighbour.port<<endl;
 
     if(nb_it == this->nb_table.end()) {
       // vector from unknown neighbour!!
@@ -259,7 +259,7 @@ int dv_udp_t::socket_handler()
       dv_it = this->dv_table.find(key);
 
       display_addr.s_addr = nb_vector[i].addr;
-      //cout<<i+1<<" "<<inet_ntoa(display_addr)<<":"<<nb_vector[i].port<<" "<<nb_vector[i].cost<<endl;
+      cout<<i+1<<" "<<inet_ntoa(display_addr)<<":"<<nb_vector[i].port<<" "<<nb_vector[i].cost<<endl;
 
       if(dv_it == this->dv_table.end()) {
         // add new entries to my dv table
@@ -341,6 +341,7 @@ int main(int argc, char *argv[])
   } else {
     dv_udp.initial = (bool)atoi(argv[1]);
     dv_udp.port = (short)atoi(argv[2]);
+    dv_udp.lo = 0;
 
     for(i=3; i<argc; i+=3) {
       k.addr = inet_addr(argv[i]);
