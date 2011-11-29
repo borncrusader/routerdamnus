@@ -182,6 +182,19 @@ void dv_udp_t::buf_to_nb_vector(vector<nb_table_entry_t> &nb_vector, unsigned ch
   }
 }
 
+void dv_udp_t::print_dv_table()
+{
+  map<table_key_t,dv_table_value_t>::iterator it;
+  in_addr display_addr;
+
+  cout<<"dv_table is "<<endl;
+  for(it=this->dv_table.begin(); it!=this->dv_table.end(); it++) {
+    display_addr.s_addr = (*it).first.addr;
+
+    cout<<(*it).first.addr<<":"<<(*it).first.port<<" "<<(*it).second.cost<<endl;
+  }
+}
+
 int dv_udp_t::socket_handler()
 {
   int i, buf_size;
@@ -215,10 +228,15 @@ int dv_udp_t::socket_handler()
     // go on and send my dv to all neighbours
     buf_size = this->dv_table_to_buf(buf);
 
+    this->print_dv_table();
+
     for(nb_it = this->nb_table.begin(); nb_it!=this->nb_table.end(); nb_it++) {
       addr.sin_family = AF_INET;
       addr.sin_addr.s_addr = (*nb_it).first.addr;
       addr.sin_port = htons((*nb_it).first.port);
+
+      display_addr.s_addr = (*nb_it).first.addr;
+      cout<<"sending dv-vector to "<<inet_ntoa(display_addr)<<":"<<(*nb_it).first.port<<endl;
 
       if(sendto(this->sock,buf,buf_size,0,(sockaddr*)&addr,addr_size) == -1) {
         close(this->sock);
@@ -284,10 +302,15 @@ int dv_udp_t::socket_handler()
     if(first_run || changed == true) {
       buf_size = this->dv_table_to_buf(buf);
 
+      this->print_dv_table();
+
       for(nb_it = this->nb_table.begin(); nb_it!=this->nb_table.end(); nb_it++) {
         addr.sin_family = AF_INET;
         addr.sin_addr.s_addr = (*nb_it).first.addr;
         addr.sin_port = htons((*nb_it).first.port);
+
+        display_addr.s_addr = (*nb_it).first.addr;
+        cout<<"sending dv-vector to "<<inet_ntoa(display_addr)<<":"<<(*nb_it).first.port<<endl;
 
         if(sendto(this->sock,buf,buf_size,0,(sockaddr*)&addr,addr_size) == -1) {
           close(this->sock);
