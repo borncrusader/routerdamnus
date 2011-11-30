@@ -29,7 +29,7 @@ for i in range(0,num_v):
 
     cmd="dv_udp {0} {1} {2} > test_log_{3} &".format(0,8001+i,nb,i+1)
     if len(sys.argv)== 3:
-      time.sleep(1)
+      #time.sleep(1)
       subprocess.call([cmd],shell=True)
     print cmd
 
@@ -40,6 +40,6 @@ for i in adj_list[init_v]:
 
 cmd="dv_udp {0} {1} {2} > test_log_{3} &".format(1,8001+init_v,nb,init_v+1)
 if len(sys.argv) == 3:
-  time.sleep(1)
+  #time.sleep(1)
   subprocess.call([cmd],shell=True)
 print cmd

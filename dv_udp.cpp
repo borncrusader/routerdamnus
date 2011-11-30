@@ -39,6 +39,7 @@ void dv_udp_t::usage()
   cout<<"       nb-ip - neighbour's ip"<<endl;
   cout<<"       nb-port - neighbour's port"<<endl;
   cout<<"       nb-cost - cost to neighbour"<<endl;
+
   exit(1);
 }
 
@@ -190,8 +191,7 @@ void dv_udp_t::print_dv_table()
   cout<<"dv_table is "<<endl;
   for(it=this->dv_table.begin(); it!=this->dv_table.end(); it++) {
     display_addr.s_addr = (*it).first.addr;
-
-    cout<<(*it).first.addr<<":"<<(*it).first.port<<" "<<(*it).second.cost<<endl;
+    cout<<inet_ntoa(display_addr)<<":"<<(*it).first.port<<" "<<(*it).second.cost<<endl;
   }
 }
 
@@ -209,7 +209,7 @@ int dv_udp_t::socket_handler()
   dv_table_value_t d_value;
   nb_table_value_t n_value;
   bool changed, first_run = true;
-  int convergence = 0;
+  int convergence = 0, wait = 0;
 
   if((this->sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
    die("dv_udp : socket creation failed!", errno);
@@ -251,7 +251,20 @@ int dv_udp_t::socket_handler()
     addr_size = sizeof(sockaddr_in);
     nb_vector.clear();
 
-    buf_size = recvfrom(this->sock,buf,1400,0,(sockaddr*)&addr,&addr_size);
+    buf_size = recvfrom(this->sock,buf,1400,MSG_DONTWAIT,(sockaddr*)&addr,&addr_size);
+
+    if(buf_size == -1) {
+      // non-blocking!
+      sleep(1);
+      wait++;
+      if(wait >= 5) {
+        break;
+      }
+      continue;
+    } else {
+      wait = 0;
+    }
+
     this->buf_to_nb_vector(nb_vector, buf, buf_size);
 
     neighbour.addr = addr.sin_addr.s_addr;
@@ -320,16 +333,18 @@ int dv_udp_t::socket_handler()
       }
     }
 
+    /*
     if(!first_run && changed == false) {
       convergence++;
       // convergence threshold = 5
       //if(convergence > this->nb_table.size()) {
         //cout<<"converged!"<<endl;
-        break;
+      //break;
       //}
     } else {
       convergence = 0;
     }
+    */
 
     first_run = false;
   }

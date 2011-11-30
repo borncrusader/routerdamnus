@@ -3,6 +3,7 @@
 #include <set>
 #include <limits>
 #include <cstdlib>
+#include <vector>
 
 #include <time.h>
 
@@ -116,12 +117,14 @@ int main(int argc, char *argv[])
     link_state_t::link_state_usage();
   }
 
-  link_state_t l1(v1-1,router.num_v), l2(v2-1,router.num_v);
+  vector<link_state_t> l(router.num_v, link_state_t(router.num_v, router.num_v));
+  
+  for(i=0; i<l.size(); i++) {
+    l[i].vertex = i;
+    l[i].compute_link_state(router);
+  }
 
-  l1.compute_link_state(router);
-  l2.compute_link_state(router);
-
-  cout<<"cost from "<<v1<<" to "<<v2<<" : "<<l1.path_cost[v2-1]<<endl;
+  cout<<"cost from "<<v1<<" to "<<v2<<" : "<<l[v1-1].path_cost[v2-1]<<endl;
 
   /*cout<<"Cost table of "<<v1<<endl;
   for(i=0;i<router.num_v;i++) {
@@ -137,19 +140,19 @@ int main(int argc, char *argv[])
   cout<<endl<<"routing table of "<<v1<<endl;
   cout<<"   node   cost   next hop"<<endl;
   for(i=0;i<router.num_v;i++) {
-    cout<<setw(7)<<i+1<<"\t"<<setw(6)<<l1.path_cost[i]<<setw(11)<<l1.next_hop[i]+1<<endl;
+    cout<<setw(7)<<i+1<<"\t"<<setw(6)<<l[v1-1].path_cost[i]<<setw(11)<<l[v1-1].next_hop[i]+1<<endl;
   }
 
   cout<<endl<<"routing table of "<<v2<<endl;
   cout<<"   node   cost   next hop"<<endl;
   for(i=0;i<router.num_v;i++) {
-    cout<<setw(7)<<i+1<<"\t"<<setw(6)<<l2.path_cost[i]<<setw(11)<<l2.next_hop[i]+1<<endl;
+    cout<<setw(7)<<i+1<<"\t"<<setw(6)<<l[v2-1].path_cost[i]<<setw(11)<<l[v2-1].next_hop[i]+1<<endl;
   }
 
   struct timespec tp;
 
   clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &tp);
-  cout<<endl<<"time to run : "<<tp.tv_sec<<"s and "<<tp.tv_nsec<<"ns"<<endl;
+  cout<<endl<<"cpu-time : "<<tp.tv_sec<<"s and "<<tp.tv_nsec<<"ns"<<endl;
 
   return 0;
 }

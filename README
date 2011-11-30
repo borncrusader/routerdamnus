@@ -1,6 +1,62 @@
+Simulation of routing algorithms
+
+usage:
+
+  link_state file-name node1 node2
+    file-name - file containing the graph represented as a list of edges
+    node1     - source node where the link-state algorithm is run
+    node2     - destination node where the link-state algorithm is run
+
+    outputs : cost from node1 to node2, routing-tables of node1 and node2
+
+  distance_vector [initial-node] | [-r] file-name node1 node2
+    initial-node - node which initially starts sending the distance vectors
+    -r           - giving this instead of the initial-node will make the
+                   algorithm akin to a router - all nodes share their distance
+                   vectors at the time of initialisation
+    file-name    - file containing the graph represented as a list of edges
+    node1        - a node in the network
+    node2        - a node in the network
+
+    outputs : cost from node1 to node2, routing-tables of node1 and node2
+
+  dv_udp [-f cfg-file] | [initial port nb-ip nb-port nb-cost ... ]
+    config can be given through cfg-file in the below format or
+    can be given as part of command-line arguments
+      initial - should the node be an initial node? (0/1)
+      port    - listening port of the node
+      nb-ip   - neighbour's ip
+      nb-port - neighbour's port
+      nb-cost - cost to neighbour
+
+    outputs : routing-table of the node
+
+cfg-file format (each config in a single line)
+---------------
 initial
 port on which to bind
 neighbour1-ip neighbour1-port neighbour1-cost
 neighbour2-ip neighbour2-port neighbour2-cost
 ...
 
+make sure the node with "initial" flag set, i.e. the node that initiates the
+algorithm by sending its distance vectors is run last after all the other nodes
+are started; because, if this node is run first, it will start sending
+its distance vectors only to not be received by its neighbours!
+
+steps:
+  1. make
+  2. run any of the three programs - link_state, distance_vector or dv_udp according
+     to the specifications provided
+
+files of concern:
+  1. routerdamnus.[cpp|h]
+     functionality common to link_state and distance_vector
+  2. distance_vector.[cpp|h]
+     functionality related to distance_vector
+  3. link_state.[cpp|h]
+     functionality related to link_state
+  4. dv_udp.[cpp|h]
+     functionality related to simulating distance_vector algorithm over UDP
+  8. makefile
+     makefile
