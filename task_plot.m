@@ -14,11 +14,11 @@ title("Task 1 : link-state, cpu-time versus source-node")
 xlabel("source-node")
 ylabel("cpu-time")
 legend("small-network","large-net-a","large-net-b")
-axis([1 32 0 3], "autox")
+axis([1 32 0 10], "autox")
 
-y4 = [4,4,4,4,4,4,4,3,4,4]
-y5 = ones(1,32)*6
-y6 = ones(1,32)*8
+y4 = [4,4,3,3,4,4,4,3,4,4]
+y5 = [10,10,9,9,9,9,9,9,8,9,8,8,9,7,8,8,9,8,7,7,9,9,9,8,8,6,8,8,8,8,7,7]
+y6 = [11,10,10,11,11,12,12,9,10,9,8,8,12,10,9,11,13,10,9,8,10,11,11,11,10,8,10,10,10,10,9,9]
 
 figure
 plot(x1,y4,'r')
@@ -30,7 +30,7 @@ title("Task 2 : distance-vector (with-initial-node), num-iterations versus initi
 xlabel("initial-node")
 ylabel("num-iterations")
 legend("small-network","large-net-a","large-net-b")
-axis([1 32 0 10], "autox")
+axis([1 32 0 20], "autox")
 
 y7 = ones(1,10)*3
 y8 = ones(1,32)*5
