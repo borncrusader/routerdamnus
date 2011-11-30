@@ -19,11 +19,7 @@ distance_vector_t::distance_vector_t(router_t& router, bool flag)
   B.resize(router.num_v, vector<bool>(router.num_v, false));
   M.resize(router.num_v, 0);
 
-  if(flag == true) {
-    rflag = true;
-  }
-  else {
-    rflag = false;
+  if (!flag) {
     I.resize(router.num_v, true);
   }
 
@@ -69,24 +65,90 @@ int distance_vector_t::send_dv_neighbors(router_t& router, unsigned int v) {
     for(j = 0 ; j < router.num_v ; j++) {
       D[k][v][j] = D[v][v][j];
     }
+    //cout<<"k="<<k<<" v="<<v<<endl;
     B[k][v] = true;
   }
 }
 
-int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v)
+int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v) {
+  int i = 0, j = 0, k = 0;          // Loop Variables
+  int num_iterations = 0;
+  bool change = false, modify = false, first = false;
+  int max = numeric_limits<float>::max();
+
+  send_dv_neighbors(router, v);
+  ++M[v];
+  I[v] = false;
+
+  while(true) {
+    change = false;
+    //++num_iterations;
+    vector <int> s;
+    for(i = 0 ; i < router.num_v ; i++) {
+      modify = false;
+      first = false;
+      //cout<<"\nNode : "<<i+1<<endl;
+      for(j = 0 ; j < router.num_v ; j++) {
+        if(B[i][j] == false) {
+          continue;
+        }
+        //cout<<"NAN="<<j+1<<" ";
+
+        if(I[i]) {
+          //cout<<"Updating "<<i+1<<" ";
+          s.push_back(i);
+          I[i] = false;
+          ++M[i];
+          first = true;
+        }
+
+        change = true;
+        B[i][j] = false;
+        //cout<<"\tReceived New DV From : "<<j+1<<endl;
+        for(k = 0 ; k < router.num_v ; k++) {
+          if(D[i][i][k] > D[i][i][j] + D[i][j][k]) {
+            modify = true;
+            D[i][i][k] = D[i][i][j] + D[i][j][k];
+            N[i][k] = j;
+            //cout<<"\t\tChanging distance to : "<<k+1<<endl;
+          }
+        }
+        //cout<<endl;
+      }
+
+      if(!first && modify) {
+        //cout<<"Updating "<<i+1<<" ";
+        s.push_back(i);
+        ++M[i];
+      }
+    }
+
+    for(i = 0 ; i < s.size() ; i++) {
+      send_dv_neighbors(router,s[i]);
+    }
+    if(change == false)
+      break;
+  }
+
+  for(i = 0 ; i < router.num_v ; i++) {
+    //cout<<"M[i]"<<M[i]<<" ";
+    if(M[i] > num_iterations) {
+      num_iterations = M[i];
+    }
+  }
+
+  cout<<"\nNumber of Iterations to Converge : "<<num_iterations<<endl<<endl;
+}
+
+int distance_vector_t::compute_distance_vector_r(router_t& router)
 {
   int i = 0, j = 0, k = 0;          // Loop Variables
   int num_iterations = 0;
   bool change = false, modify = false;
   int max = numeric_limits<float>::max();
 
-  if(rflag) {
-    for(i = 0 ; i < router.num_v ; i++)
-      send_dv_neighbors(router, i);
-  }
-  else {
-    send_dv_neighbors(router, v);
-  }
+  for(i = 0 ; i < router.num_v ; i++)
+    send_dv_neighbors(router, i);
 
   while(true) {
     change = false;
@@ -113,12 +175,9 @@ int distance_vector_t::compute_distance_vector(router_t& router, unsigned int v)
         }
         //cout<<endl;
       }
-      if(!rflag && (modify || I[i])) {
-        s.push_back(i);
-        I[i] = false;
-        ++M[i];
-      }
-      else if(rflag && modify) {
+
+      if(modify) {
+        //cout<<"updating neighbors"<<endl;
         s.push_back(i);
         ++M[i];
       }
@@ -235,7 +294,10 @@ int main(int argc, char *argv[])
 
   //dv.print_adj_list(router);
 
-  dv.compute_distance_vector(router, v-1);
+  if(flag)
+    dv.compute_distance_vector_r(router);
+  else
+    dv.compute_distance_vector(router, v-1);
 
   cout<<"Cost from "<<v1<<" to "<<v2<<" : "<<dv.D[v1-1][v1-1][v2-1]<<endl<<endl;
 

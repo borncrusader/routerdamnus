@@ -9,7 +9,6 @@ class distance_vector_t
 {
   public:
   // member variables
-  bool rflag;
   vector < vector < vector<float> > > D; // DV Table for each node
   vector < vector <unsigned int> > N; // Neighbor Array
   vector < vector<bool> > B; // Flag array
@@ -23,6 +22,7 @@ class distance_vector_t
   // driver functions
   int send_dv_neighbors(router_t&, unsigned int);
   int compute_distance_vector(router_t&, unsigned int);
+  int compute_distance_vector_r(router_t&);
   void print_distance_vector(router_t&, unsigned int, unsigned int);
   void print_all_distance_vector_table(router_t&);
   void print_all_distance_vector(router_t&);
