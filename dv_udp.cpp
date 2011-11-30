@@ -257,7 +257,7 @@ int dv_udp_t::socket_handler()
       // non-blocking!
       sleep(1);
       wait++;
-      if(wait >= 5) {
+      if(wait >= 60) {
         break;
       }
       continue;
