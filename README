@@ -44,6 +44,9 @@ algorithm by sending its distance vectors is run last after all the other nodes
 are started; because, if this node is run first, it will start sending
 its distance vectors only to not be received by its neighbours!
 
+please have a look at the sample configuration files provided - sample-{a,b,c}.cfg
+related to the sample-graph.png network, with node 'c' behaving as the initial node.
+
 steps:
   1. make
   2. run any of the three programs - link_state, distance_vector or dv_udp according
@@ -58,5 +61,7 @@ files of concern:
      functionality related to link_state
   4. dv_udp.[cpp|h]
      functionality related to simulating distance_vector algorithm over UDP
-  8. makefile
+  5. makefile
      makefile
+  6. sample-a.cfg, sample-b.cfg and sample-c.cfg
+     sample cfg files for the dv_udp program related to sample-graph.png
